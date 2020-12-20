@@ -1,4 +1,17 @@
-from random import randint, getrandbits
+from random import random
+
+
+def _pow(x: int, y: int, n=None) -> int:
+	"""
+	Actual Python Pow function.
+	:param x: number
+	:param y: exponent
+	:param n: modulus
+	:return:
+	"""
+
+	return (x ** y) % n if n is not None else (x**y)
+
 
 def is_square(n: int) -> bool:
 	sq_mod256 = (1,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0)
@@ -30,6 +43,7 @@ def int_sqrt(n: int) -> int:
 			return x
 		x = y
 
+
 def gcd(a:int,b:int) -> tuple:
 	#if a or b is zero return the other value and the coeffecient's accordingly.
 	if a==0:
@@ -45,6 +59,7 @@ def gcd(a:int,b:int) -> tuple:
 		# y is thus x.
 		return g, y - (b // a) * x, x
 
+
 def lcm(a:int,b:int) -> int:
 	if a==0 or b==0:
 		return 0
@@ -56,6 +71,7 @@ def lcm(a:int,b:int) -> int:
 	g=gcd(a,b)[0]
 	l=(a//g)*b
 	return l
+
 
 def uv_subscript(n: int, u1: int, v1: int, u2: int, v2: int, d: int, q: int, m: int) -> tuple:
 	k=q
@@ -77,26 +93,29 @@ def uv_subscript(n: int, u1: int, v1: int, u2: int, v2: int, d: int, q: int, m: 
 
 	return u1, v1
 
-def _factor(n:int,p:int=2) -> int:
+
+def _factor(n:int,p:int=2) -> tuple:
 	s=0;d = n -1; q = p
 	while not (d & q -1):
 		s +=1
 		q *= p
 	return s, d // (q // p)
 
+
 def strong_psuedoprime(n: int, a: int, s: int = None, d: int = None) -> int:
 	if (s is None) or (d is None):
 		s, d = _factor(n)
-	x = pow(a,d,n)
+	x = _pow(a,d,n)
 	if x == 1:
 		return True
 
 	for i in range(s):
 		if x == n -1:
 			return True
-		x = pow(x,2,n)
+		x = _pow(x,2,n)
 
 	return False
+
 
 def lucas_psuedoprime(n: int, D: int, P: int, Q: int) -> int:
 	U, V = uv_subscript(n+1,n,1,P,P,Q,D)
@@ -114,7 +133,7 @@ def lucas_psuedoprime(n: int, D: int, P: int, Q: int) -> int:
 		return True
 
 	for r in range(s):
-		u, v = (U*V)%n, (pow(V,2,n) - 2*pow(Q,d*(1<<r),n)) % n
+		u, v = (U*V)%n, (_pow(V,2,n) - 2*_pow(Q,d*(1<<r),n)) % n
 		if V == 0:
 			return True
 
@@ -198,8 +217,10 @@ def baillie_psw(n: int) ->bool:
 
 	return True
 
+
 def is_prime(n:int)->bool:
 	return baillie_psw(n)
+
 
 def next_prime(n:int) -> int:
 	if n < 2:
@@ -214,6 +235,7 @@ def next_prime(n:int) -> int:
 
 	return n
 
+
 def get_prime(bits:int) -> int:
-	candidate = getrandbits(bits)
+	candidate = int(random()*1<<bits)
 	return next_prime(candidate)
