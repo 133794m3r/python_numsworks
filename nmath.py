@@ -1,7 +1,40 @@
 from random import random
 
+def powmod(b:int,e:int,m:int) -> int:
+	if m == 1:
+		return 0
+	else:
+		r = 1
+		while e > 0:
+			if e & 1:
+				r = (r*b) % m
+			e >>= 1
+			b = (b*b) % m
+		return r
 
-def _pow(x: int, y: int, n=None) -> int:
+
+def __pow(b: int, x: int) -> int:
+	if x == 0: return 1
+	r = 1
+	while x > 0:
+		if x & 1:
+			r *= b
+
+		x >>= 1
+		b *= b
+
+	return r
+
+
+def pow(b: int, x: int, m: int) -> int:
+	if m is not None:
+		return powmod(b,x,m)
+	else:
+		return __pow(b, x)
+
+
+## recursive version shouldn't really be used to due to stack recursion limits and also stack use.
+def __pow_(x: int, y: int, n=None) -> int:
 	"""
 	Actual Python Pow function.
 	:param x: number
@@ -9,8 +42,17 @@ def _pow(x: int, y: int, n=None) -> int:
 	:param n: modulus
 	:return:
 	"""
-
-	return (x ** y) % n if n is not None else (x**y)
+	if y == 0: return 1
+	if  y &1 == 0:
+		if n is not None:
+			return (__pow_(x,(y>>1),n) **2) % n
+		else:
+			return __pow_(x,(y>>1)) **2
+	else:
+		if n is not None:
+			return (x*__pow_(x,(y-1),n)) % n
+		else:
+			return x*__pow_(x,(y-1))
 
 
 def is_square(n: int) -> bool:
@@ -45,7 +87,7 @@ def int_sqrt(n: int) -> int:
 
 
 def gcd(a:int,b:int) -> tuple:
-	#if a or b is zero return the other value and the coeffecient's accordingly.
+	#if a or b is zero return the other value and the coefficients accordingly.
 	if a==0:
 		return b, 0, 1
 	elif b==0:
@@ -58,6 +100,14 @@ def gcd(a:int,b:int) -> tuple:
 		# we're returning the gcd, x equals y - floor(b/a) * x
 		# y is thus x.
 		return g, y - (b // a) * x, x
+
+
+def mod_inv(a,mod):
+	g, x, y = gcd(a,mod)
+	if gcd not in (-1,1):
+		raise ValueError('Inputs are invalid. No modular multiplicative inverse exists between {} and {} gcd:{}.\n'.format(a,mod,g))
+	else:
+		return x % mod
 
 
 def lcm(a:int,b:int) -> int:
@@ -73,68 +123,20 @@ def lcm(a:int,b:int) -> int:
 	return l
 
 
-def uv_subscript(n: int, u1: int, v1: int, u2: int, v2: int, d: int, q: int, m: int) -> tuple:
-	k=q
-	while m>0:
-		u2 = (u2 * v2) % n
-		v2 = ((v2 * v2) - (2 * q)) % n
-		q = (q*q) % n
-		if m & 1:
-			t1, t2 = u2*v1, u1*v2
-			t3, t4 = v2*v1, u2 * u1 * d
-			u1, v1 = t1 + t2, t3+t4
-			if u1 &1:
-				u1 = u1 + n
-			if v1 & 1:
-				v1 = v1 +n
-			u1, v1 = (u1/2) % n, (v1/2) % n
-			k = (q*k) % n
-		m = m >> 1
-
-	return u1, v1
-
-
-def _factor(n:int,p:int=2) -> tuple:
-	s=0;d = n -1; q = p
-	while not (d & q -1):
-		s +=1
-		q *= p
-	return s, d // (q // p)
-
-
-def strong_psuedoprime(n: int, a: int, s: int = None, d: int = None) -> int:
-	if (s is None) or (d is None):
-		s, d = _factor(n)
-	x = _pow(a,d,n)
-	if x == 1:
-		return True
-
-	for i in range(s):
-		if x == n -1:
-			return True
-		x = _pow(x,2,n)
-
-	return False
-
-
-def lucas_psuedoprime(n: int, D: int, P: int, Q: int) -> int:
-	U, V = uv_subscript(n+1,n,1,P,P,Q,D)
-	if U != 0:
-		return False
-	d = n+1
+def miller_rabin_base2(n):
+	d = n-1
 	s = 0
 	while not d & 1:
 		d >>= 1
-		s+=1
-
-	U, V = uv_subscript(n+1,n,1,P,P,Q,D)
-
-	if U == 0:
+		s +=1
+	x = pow(2,d,n)
+	if x == 1 or x == (n-1):
 		return True
-
-	for r in range(s):
-		u, v = (U*V)%n, (_pow(V,2,n) - 2*_pow(Q,d*(1<<r),n)) % n
-		if V == 0:
+	for i in range(s-1):
+		x = pow(x,2,n)
+		if x == 1:
+			return False
+		elif x == n -1:
 			return True
 
 	return False
@@ -172,6 +174,53 @@ def _choose_d(n:int) -> int:
 	return D
 
 
+def uv_subscript(k, n, U, V, P, Q, D):
+	digits = bin(k)[3:]
+	subscript = 1
+	for digit in digits:
+		U, V = U*V % n, (pow(V, 2, n) - 2*pow(Q, subscript, n)) % n
+		subscript <<= 1
+		if digit == '1':
+			if not (P*U + V) & 1:
+				if not (D*U + P*V) & 1:
+					U, V = (P*U + V) >> 1, (D*U + P*V) >> 1
+				else:
+					U, V = (P*U + V) >> 1, (D*U + P*V + n) >> 1
+			elif not (D*U + P*V) & 1:
+				U, V = (P*U + V + n) >> 1, (D*U + P*V) >> 1
+			else:
+				U, V = (P*U + V + n) >> 1, (D*U + P*V + n) >> 1
+			subscript += 1
+			U, V = U % n, V % n
+
+	return U, V
+
+
+def lucas_pp(n, D, P, Q):
+	U, V = uv_subscript(n + 1, n, 1, P, P, Q, D)
+
+	if U != 0:
+		return False
+
+	d = n + 1
+	s = 0
+	while not d & 1:
+		d = d >> 1
+		s += 1
+
+	U, V = uv_subscript(n + 1, n, 1, P, P, Q, D)
+
+	if U == 0:
+		return True
+
+	for r in range(s):
+		U, V = (U*V) % n, (pow(V, 2, n) - 2*pow(Q, d*(1<<r), n)) % n
+		if V == 0:
+			return True
+
+	return False
+
+
 def baillie_psw(n: int) ->bool:
 	if 4 >= n >= 1:
 		return True
@@ -205,16 +254,14 @@ def baillie_psw(n: int) ->bool:
 		elif n % prime == 0:
 			return False
 
-	if not strong_psuedoprime(n,2):
+	if not miller_rabin_base2(n):
 		return False
-
-	if is_square(n):
+	elif is_square(n):
 		return False
 
 	D = _choose_d(n)
-	if not lucas_psuedoprime(n,D,1,(1-D)/4):
+	if not lucas_pp(n,D,1,(1-D)/4):
 		return False
-
 	return True
 
 
@@ -228,7 +275,6 @@ def next_prime(n:int) -> int:
 	if n < 5:
 		return (3,5,5)[n-2]
 	gap = (1, 6, 5, 4, 3, 2, 1, 4, 3, 2, 1, 2, 1, 4, 3, 2, 1, 2, 1, 4, 3, 2, 1,6, 5, 4, 3, 2, 1, 2)
-
 	n+= 1 if not n &1 else 2
 	while not is_prime(n):
 		n += gap[n % 30]
@@ -237,5 +283,6 @@ def next_prime(n:int) -> int:
 
 
 def get_prime(bits:int) -> int:
-	candidate = int(random()*1<<bits)
+	#this isn't the best way to do this but it works for the small enough primes I'll be dealing with.
+	candidate = int(random()*(1<<bits))
 	return next_prime(candidate)
