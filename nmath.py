@@ -1,6 +1,16 @@
-from random import random
+from math import ceil
+from random import random, getrandbits
+
 
 def powmod(b:int,e:int,m:int) -> int:
+	"""
+	Function to calculate b^e % m using the binary squaring exponation method. Barely slower than CPython native version.
+
+	:param b: Base number
+	:param e: Exponent
+	:param m: Modulus
+	:return: Integer
+	"""
 	if m == 1:
 		return 0
 	else:
@@ -13,34 +23,63 @@ def powmod(b:int,e:int,m:int) -> int:
 		return r
 
 
-def __pow(b: int, x: int) -> int:
-	if x == 0: return 1
+def __pow(b: int, e: int) -> int:
+	"""
+	reimplementation of the pow function without modulus. Don't use. Internal only.
+
+	:param b: Base
+	:param e: Exponent
+	:return: Integer result
+	"""
+	if e == 0: return 1
 	r = 1
-	while x > 0:
-		if x & 1:
+	while e > 0:
+		if e & 1:
 			r *= b
 
-		x >>= 1
+		e >>= 1
 		b *= b
 
 	return r
 
 
-def pow(b: int, x: int, m: int) -> int:
+def pow(b: int, x: int, m: int = None) -> int:
+	"""
+	Re-implementation of the CPython pow function for MicroPython.
+	Modulus is optional and also handles negative exponents.
+
+	:param b: Base
+	:param x: Exponent
+	:param m: Modulus.
+	:return: Integer or Float if x is positive or negative respectively.
+	"""
+	res = 0
+	if type(x) is not int:
+		raise ValueError("exponent must be an integer")
 	if m is not None:
-		return powmod(b,x,m)
+		if x > 0:
+			res = powmod(b,x,m)
+		else:
+			res = 1/powmod(b,x*-1,m)
 	else:
-		return __pow(b, x)
+		if x > 0:
+			res = __pow(b, x)
+		else:
+			res = 1/pow(b,x*-1)
+
+	return res
 
 
 ## recursive version shouldn't really be used to due to stack recursion limits and also stack use.
 def __pow_(x: int, y: int, n=None) -> int:
 	"""
-	Actual Python Pow function.
+	Recursive version of the above functions.
+	Shouldn't be utilized due to the fact of recursion limits and stack use.
+
 	:param x: number
 	:param y: exponent
 	:param n: modulus
-	:return:
+	:return: Result
 	"""
 	if y == 0: return 1
 	if  y &1 == 0:
@@ -56,7 +95,22 @@ def __pow_(x: int, y: int, n=None) -> int:
 
 
 def is_square(n: int) -> bool:
-	sq_mod256 = (1,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0)
+	"""
+	checks if the number 'n' is an even square.
+
+	:param n: Number to check
+	:return: True or False if number is square or not.
+	"""
+	sq_mod256 = (1,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,0,0,0,0,0,
+	             0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,
+				 0,0,1,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,
+				 0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,
+				 0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,0,
+				 0,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,
+				 0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,
+				 1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,
+				 0,1,0,0,0,0,0,0)
+
 	if sq_mod256[n & 0xff] == 0:
 		return False
 
@@ -75,6 +129,12 @@ def is_square(n: int) -> bool:
 
 
 def int_sqrt(n: int) -> int:
+	"""
+	Square root function with integers.
+
+	:param n: The integer to work upon.
+	:return: An integer resulting from the square root. Just the integer part.
+	"""
 	if n == 0:
 		return 0
 
@@ -87,6 +147,13 @@ def int_sqrt(n: int) -> int:
 
 
 def gcd(a:int,b:int) -> tuple:
+	"""
+	GCD function utilizing EGCD method.
+
+	:param a: First number to check.
+	:param b: Second number to check.
+	:return: A tuple containing the GCD, and coeffecients a and b.
+	"""
 	#if a or b is zero return the other value and the coefficients accordingly.
 	if a==0:
 		return b, 0, 1
@@ -102,15 +169,29 @@ def gcd(a:int,b:int) -> tuple:
 		return g, y - (b // a) * x, x
 
 
-def mod_inv(a,mod):
+def mod_inv(a:int,mod:int) -> int:
+	"""
+	Modular inverse calculation using egcd to calculate bezout's coeffecients.
+
+	:param a: Integer to work with.
+	:param mod: Modulus value.
+	:return: The integer represneting the modular multiplicative inverse.
+	"""
 	g, x, y = gcd(a,mod)
-	if gcd not in (-1,1):
+	if g not in (-1,1):
 		raise ValueError('Inputs are invalid. No modular multiplicative inverse exists between {} and {} gcd:{}.\n'.format(a,mod,g))
 	else:
 		return x % mod
 
 
 def lcm(a:int,b:int) -> int:
+	"""
+	Simple LCM function utilizing egcd.
+
+	:param a: The first number.
+	:param b: The second number.
+	:return: The least common multiple between a and b.
+	"""
 	if a==0 or b==0:
 		return 0
 	elif a==1:
@@ -123,7 +204,14 @@ def lcm(a:int,b:int) -> int:
 	return l
 
 
-def miller_rabin_base2(n):
+def miller_rabin_base2(n:int) -> bool:
+	"""
+	Miller Rabbin test for Base 2 only.
+
+	:param n: Integer to check.
+	:return: If the number is prime or not.
+	:rtype: bool
+	"""
 	d = n-1
 	s = 0
 	while not d & 1:
@@ -143,6 +231,13 @@ def miller_rabin_base2(n):
 
 
 def jacobi(a:int,n:int) ->int:
+	"""
+	Jacobi symbol calculator.
+
+	:param a: The parameter a
+	:param n: The parameter n
+	:return: The integer
+	"""
 	if (not n & 1) or (n<0):
 		raise ValueError('n must be a positive odd number')
 	if(a == 0) or (a == 1):
@@ -166,6 +261,12 @@ def jacobi(a:int,n:int) ->int:
 
 
 def _choose_d(n:int) -> int:
+	"""
+	D value chooser for lucas psuedoprime test.
+
+	:param n: number to work with.
+	:return: the integer value of D.
+	"""
 	D = 5
 	while jacobi(D,n) != -1:
 		D +=2 if D > 0 else -2
@@ -174,13 +275,14 @@ def _choose_d(n:int) -> int:
 	return D
 
 
-def uv_subscript(k, n, U, V, P, Q, D):
-	digits = bin(k)[3:]
+def uv_subscript(k: int, n: int, U: int, V: int, P: int, Q: int, D: int) -> tuple:
+	digits = list(map(int,bin(k)[3:]))
+
 	subscript = 1
 	for digit in digits:
 		U, V = U*V % n, (pow(V, 2, n) - 2*pow(Q, subscript, n)) % n
 		subscript <<= 1
-		if digit == '1':
+		if digit == 1:
 			if not (P*U + V) & 1:
 				if not (D*U + P*V) & 1:
 					U, V = (P*U + V) >> 1, (D*U + P*V) >> 1
@@ -196,8 +298,8 @@ def uv_subscript(k, n, U, V, P, Q, D):
 	return U, V
 
 
-def lucas_pp(n, D, P, Q):
-	U, V = uv_subscript(n + 1, n, 1, P, P, Q, D)
+def lucas_pp(n:int, D:int, P:int, Q:float) -> bool:
+	U, V = uv_subscript(n + 1, n, 1, P, P, int(Q), D)
 
 	if U != 0:
 		return False
@@ -208,7 +310,7 @@ def lucas_pp(n, D, P, Q):
 		d = d >> 1
 		s += 1
 
-	U, V = uv_subscript(n + 1, n, 1, P, P, Q, D)
+	U, V = uv_subscript(n + 1, n, 1, P, P, int(Q), D)
 
 	if U == 0:
 		return True
@@ -220,13 +322,7 @@ def lucas_pp(n, D, P, Q):
 
 	return False
 
-
-def baillie_psw(n: int) ->bool:
-	if 4 >= n >= 1:
-		return True
-	elif not n &1:
-		return False
-
+def sieve_test(n):
 	sieve_base = (2, 3, 5, 7, 11, 13, 17, 19, 23, 29,
 		31, 37, 41, 43, 47, 53, 59, 61, 67, 71,
 		73, 79, 83, 89, 97, 101, 103, 107, 109, 113,
@@ -253,15 +349,27 @@ def baillie_psw(n: int) ->bool:
 			return True
 		elif n % prime == 0:
 			return False
+	return None
+
+def baillie_psw(n: int) ->bool:
+	if 4 >= n >= 1:
+		return True
+	elif not n &1:
+		return False
+
+	res = sieve_test(n)
+	if res is not None:
+		return res
 
 	if not miller_rabin_base2(n):
-		return False
+			return False
 	elif is_square(n):
 		return False
 
 	D = _choose_d(n)
 	if not lucas_pp(n,D,1,(1-D)/4):
 		return False
+
 	return True
 
 
@@ -276,13 +384,38 @@ def next_prime(n:int) -> int:
 		return (3,5,5)[n-2]
 	gap = (1, 6, 5, 4, 3, 2, 1, 4, 3, 2, 1, 2, 1, 4, 3, 2, 1, 2, 1, 4, 3, 2, 1,6, 5, 4, 3, 2, 1, 2)
 	n+= 1 if not n &1 else 2
-	while not is_prime(n):
+	found_prime = False
+	while not found_prime:
 		n += gap[n % 30]
+		#first do the sieve test as it's fastest.
+		tmp = sieve_test(n)
+		if tmp is not None:
+			found_prime = tmp
+		#if it says not conclusive see if the number is a square.
+		elif is_square(n):
+			found_prime = False
+		else:
+			#otherwise we do the miller rabin base 2 test.
+			if miller_rabin_base2(n):
+				#it seems to be prime so try the lucas probable prime test also to make sure.
+				D = _choose_d(n)
+				if not lucas_pp(n, D, 1, (1 - D) / 4):
+					found_prime = False
+				#it passed all of the tests so it's probably a prime.
+				else:
+					break
 
 	return n
 
 
 def get_prime(bits:int) -> int:
-	#this isn't the best way to do this but it works for the small enough primes I'll be dealing with.
-	candidate = int(random()*(1<<bits))
-	return next_prime(candidate)
+	n = (bits // 31)
+	k = 0
+	d = 0
+	while k < n:
+		d|= (getrandbits(31) << (k*31))
+		k+=1
+	#add the final bit of bits based upon the remainder.
+	d |= (getrandbits(bits % 31) << (k*31))
+	#then get the next prime number.
+	return next_prime(d)

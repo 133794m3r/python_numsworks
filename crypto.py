@@ -1,6 +1,6 @@
 from nmath import *
 
-def make_key(key_size,e_size=8):
+def make_key(key_size:int,e_size:int=8):
 	prime_length = key_size // 2
 	p=get_prime(prime_length)
 	q=get_prime(prime_length)
@@ -14,7 +14,7 @@ def make_key(key_size,e_size=8):
 	return N, p, q, e, d
 
 
-def calc_n(prime_length):
+def calc_n(prime_length:int) -> int:
 	prime_length = prime_length // 2
 	p=get_prime(prime_length)
 	q=get_prime(prime_length)
@@ -25,7 +25,7 @@ def calc_n(prime_length):
 	return p, q, N
 
 
-def calc_e(prime_length,lambda_n):
+def calc_e(prime_length: int, lambda_n: int) -> int:
 	e = get_prime(prime_length)
 	coprime = gcd(e,lambda_n)[0]
 	while coprime !=1:
@@ -35,11 +35,11 @@ def calc_e(prime_length,lambda_n):
 	return e
 
 
-def calc_lambda(p,q):
+def calc_lambda(p:int,q:int):
 	return lcm(p-1,q-1)
 
 
-def calc_d(e,lambda_n):
+def calc_d(e:int,lambda_n:int):
 	return mod_inv(e,lambda_n)
 
 
@@ -96,10 +96,39 @@ def ip2ascii(encoded_num):
 	return output_str
 
 
+def common_mod_atk(c1,c2,e1,e2,N):
+	a=0;b=0;mx=0;my=0;i=0
+
+	g = gcd(e1,e2)[0]
+	if g != 1:
+		raise ValueError("e1 and e2 aren't valid. Must be coprimes.")
+
+	a = mod_inv(e1,e2)
+	b = (g - (e1*a)) // e2
+	i = mod_inv(c2,N)
+	mx = pow(c1,a,N)
+	my = pow(i,-b,N)
+
+	return (mx*my) % N
+
+
+def fermats_factor(n):
+	a = int_sqrt(n)
+	b = (a*a) - n
+	while not is_square(b):
+		a+=1
+		b = (a*a) - n
+
+	tmp = int_sqrt(b)
+	p = a + tmp
+	q = a - tmp
+	return p,q
+
+
 def make_fermat(bit_width):
 	pl = bit_width // 2
 	p=get_prime(pl)
-	q = next_prime(p+(1<<(pl/8)))
+	q = next_prime(p+(1<<(pl//3)))
 	n = p*q
 	ln = calc_lambda(p,q)
 	e = calc_e(n & 1 and 9 or 8,ln)
