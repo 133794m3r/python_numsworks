@@ -1,5 +1,5 @@
 from math import ceil
-from random import random, getrandbits
+from random import getrandbits
 
 
 def powmod(b:int,e:int,m:int) -> int:
@@ -102,7 +102,7 @@ def is_square(n: int) -> bool:
 	:return: True or False if number is square or not.
 	"""
 	sq_mod256 = (1,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,0,0,0,0,0,
-	             0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,
+				 0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,
 				 0,0,1,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,
 				 0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,
 				 0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,0,
@@ -382,7 +382,7 @@ def next_prime(n:int) -> int:
 		return 2
 	if n < 5:
 		return (3,5,5)[n-2]
-	gap = (1, 6, 5, 4, 3, 2, 1, 4, 3, 2, 1, 2, 1, 4, 3, 2, 1, 2, 1, 4, 3, 2, 1,6, 5, 4, 3, 2, 1, 2)
+	gap = (1, 6, 5, 4, 3, 2, 1, 4, 3, 2, 1, 2, 1, 4, 3, 2, 1, 2, 1, 4, 3, 2, 1, 6, 5, 4, 3, 2, 1, 2)
 	n+= 1 if not n &1 else 2
 	found_prime = False
 	while not found_prime:
@@ -407,15 +407,29 @@ def next_prime(n:int) -> int:
 
 	return n
 
+def getmorebits(bits: int) -> int:
+	"""
+	:param bits: The number of bits to generate.
+	:return: The resulting integer.
+	"""
+
+	n = bits // 32
+	d = 0
+	for i in range(n):
+		d |= getrandbits(32) << (i * 32)
+	r = bits % 32
+
+	if bits:
+		d |= getrandbits(bits % 32) << (n * 32)
+
+	return d
 
 def get_prime(bits:int) -> int:
-	n = (bits // 31)
-	k = 0
-	d = 0
-	while k < n:
-		d|= (getrandbits(31) << (k*31))
-		k+=1
-	#add the final bit of bits based upon the remainder.
-	d |= (getrandbits(bits % 31) << (k*31))
-	#then get the next prime number.
-	return next_prime(d)
+	"""
+	:param bits: The number of bits to generate.
+	:return: The resulting integer.
+	"""
+	
+	n = getmorebits(bits)
+	return next_prime(n)
+
