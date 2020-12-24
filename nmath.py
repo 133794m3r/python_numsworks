@@ -1,4 +1,3 @@
-from math import ceil
 from random import getrandbits
 
 
@@ -53,6 +52,7 @@ def pow(b: int, x: int, m: int = None) -> int:
 	:param m: Modulus.
 	:return: Integer or Float if x is positive or negative respectively.
 	"""
+
 	res = 0
 	if type(x) is not int:
 		raise ValueError("exponent must be an integer")
@@ -81,6 +81,7 @@ def __pow_(x: int, y: int, n=None) -> int:
 	:param n: modulus
 	:return: Result
 	"""
+
 	if y == 0: return 1
 	if  y &1 == 0:
 		if n is not None:
@@ -101,6 +102,7 @@ def is_square(n: int) -> bool:
 	:param n: Number to check
 	:return: True or False if number is square or not.
 	"""
+
 	sq_mod256 = (1,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,0,0,0,0,0,
 				 0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,
 				 0,0,1,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,
@@ -135,6 +137,7 @@ def int_sqrt(n: int) -> int:
 	:param n: The integer to work upon.
 	:return: An integer resulting from the square root. Just the integer part.
 	"""
+
 	if n == 0:
 		return 0
 
@@ -154,6 +157,7 @@ def gcd(a:int,b:int) -> tuple:
 	:param b: Second number to check.
 	:return: A tuple containing the GCD, and coeffecients a and b.
 	"""
+
 	#if a or b is zero return the other value and the coefficients accordingly.
 	if a==0:
 		return b, 0, 1
@@ -177,6 +181,7 @@ def mod_inv(a:int,mod:int) -> int:
 	:param mod: Modulus value.
 	:return: The integer represneting the modular multiplicative inverse.
 	"""
+
 	g, x, y = gcd(a,mod)
 	if g not in (-1,1):
 		raise ValueError('Inputs are invalid. No modular multiplicative inverse exists between {} and {} gcd:{}.\n'.format(a,mod,g))
@@ -192,6 +197,7 @@ def lcm(a:int,b:int) -> int:
 	:param b: The second number.
 	:return: The least common multiple between a and b.
 	"""
+
 	if a==0 or b==0:
 		return 0
 	elif a==1:
@@ -212,6 +218,7 @@ def miller_rabin_base2(n:int) -> bool:
 	:return: If the number is prime or not.
 	:rtype: bool
 	"""
+
 	d = n-1
 	s = 0
 	while not d & 1:
@@ -238,6 +245,7 @@ def jacobi(a:int,n:int) ->int:
 	:param n: The parameter n
 	:return: The integer
 	"""
+
 	if (not n & 1) or (n<0):
 		raise ValueError('n must be a positive odd number')
 	if(a == 0) or (a == 1):
@@ -267,6 +275,7 @@ def _choose_d(n:int) -> int:
 	:param n: number to work with.
 	:return: the integer value of D.
 	"""
+
 	D = 5
 	while jacobi(D,n) != -1:
 		D +=2 if D > 0 else -2
@@ -343,12 +352,18 @@ def sieve_test(n):
 		1019, 1021, 1031, 1033, 1039, 1049, 1051, 1061, 1063, 1069,
 		1087, 1091, 1093, 1097, 1103, 1109, 1117, 1123, 1129, 1151,
 		1153, 1163, 1171, 1181, 1187, 1193, 1201, 1213, 1217, 1223)
-
-	for prime in sieve_base:
-		if n == prime:
-			return True
-		elif n % prime == 0:
+	for prime in sive_base[0:14]:
+		if n % prime == 0:
 			return False
+	if n < 2809:
+		return True
+	if n <= 23001:
+		return pow(2,n,n) == 2 and (n not in [7957, 8321, 13747, 18721, 19951])
+	
+	for prime in sieve_base[15:]:
+		if n % prime == 0:
+			return False
+	
 	return None
 
 def baillie_psw(n: int) ->bool:

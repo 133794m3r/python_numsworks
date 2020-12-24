@@ -1,6 +1,7 @@
+from typing import Tuple
 from nmath import *
 
-def make_key(key_size:int,e_size:int=8):
+def make_key(key_size:int,e_size:int=8) -> Tuple[int, int, int, int, int]:
 	prime_length = key_size // 2
 	p=get_prime(prime_length)
 	q=get_prime(prime_length)
@@ -14,7 +15,7 @@ def make_key(key_size:int,e_size:int=8):
 	return N, p, q, e, d
 
 
-def calc_n(prime_length:int) -> int:
+def calc_n(prime_length:int) -> Tuple[int, int, int]:
 	prime_length = prime_length // 2
 	p=get_prime(prime_length)
 	q=get_prime(prime_length)
@@ -51,16 +52,16 @@ def rs_decrypt(C,d,N):
 	return pow(C,d,N)
 
 
-def os2ip(os):
+def os2ip(os:str) -> int:
 	os = os[::-1]
 	x = 0
 	for i,c in enumerate(os):
-		x += (ord(c) *(1<< (8*i)))
+		x += (ord(c) *(1<<(8*i)))
 
 	return x
 
 
-def ip2os(x,x_len):
+def ip2os(x:int,x_len:int)->str:
 	if x >= (1<<(8*x_len)):
 		raise ValueError("Number is too large to fit in a string of that length")
 	X = []
@@ -68,7 +69,7 @@ def ip2os(x,x_len):
 	while x>0:
 		X.append(x % 256)
 		x >>= 8
-	X+=[0]*(x_len-len(X))
+	X+=([0]*(x_len-len(X)))
 	X=X[::-1]
 	for item in X:
 		os+=chr(item)
@@ -76,11 +77,11 @@ def ip2os(x,x_len):
 	return os
 
 
-def ascii2ip(string):
+def ascii2ip(string:str) -> int:
 	return int(''.join(map(lambda x: str(ord(x)), string)))
 
 
-def ip2ascii(encoded_num):
+def ip2ascii(encoded_num:int) -> str:
 	encoded_num = str(encoded_num)
 	in_len = len(encoded_num)
 	j = 0
@@ -96,7 +97,7 @@ def ip2ascii(encoded_num):
 	return output_str
 
 
-def common_mod_atk(c1,c2,e1,e2,N):
+def common_mod_atk(c1: int, c2: int, e1: int, e2: int, N: int) -> int:
 	a=0;b=0;mx=0;my=0;i=0
 
 	g = gcd(e1,e2)[0]
@@ -112,7 +113,7 @@ def common_mod_atk(c1,c2,e1,e2,N):
 	return (mx*my) % N
 
 
-def fermats_factor(n):
+def fermats_factor(n:int) -> Tuple[int,int]:
 	a = int_sqrt(n)
 	b = (a*a) - n
 	while not is_square(b):
@@ -125,13 +126,13 @@ def fermats_factor(n):
 	return p,q
 
 
-def make_fermat(bit_width):
+def make_fermat(bit_width:int) -> Tuple[int, int, int, int, int]:
 	pl = bit_width // 2
 	p=get_prime(pl)
 	q = next_prime(p+(1<<(pl//3)))
 	n = p*q
-	ln = calc_lambda(p,q)
-	e = calc_e(n & 1 and 9 or 8,ln)
+	ln = calc_lambda(p, q)
+	e = calc_e(n & 1 and 9 or 8, ln)
 	d = calc_d(e,ln)
-	return n,p,q,e,d
+	return n, p, q, e, d
 
