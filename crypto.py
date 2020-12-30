@@ -1,7 +1,6 @@
-from typing import Tuple
 from nmath import *
 
-def make_key(key_size:int,e_size:int=8) -> Tuple[int, int, int, int, int]:
+def make_key(key_size:int,e_size:int=8) -> tuple[int, int, int, int, int]:
 	if key_size & 1:
 		prime_length = (key_size//2) + 1
 	else:
@@ -18,7 +17,7 @@ def make_key(key_size:int,e_size:int=8) -> Tuple[int, int, int, int, int]:
 	return N, p, q, e, d
 
 
-def calc_n(prime_length:int) -> Tuple[int, int, int]:
+def calc_n(prime_length:int) -> tuple[int, int, int]:
 	if prime_length & 1:
 		prime_length = (prime_length//2) + 1
 		p = get_prime(prime_length-1)
@@ -61,7 +60,10 @@ def rs_decrypt(C,d,N):
 
 
 def os2ip(os:str) -> int:
-	os = os[::-1]
+	try:
+		os = os[::-1]
+	except NotImplementedError:
+		os = rev(os)
 	x = 0
 	for i,c in enumerate(os):
 		x += (ord(c) *(1<<(8*i)))
@@ -78,7 +80,7 @@ def ip2os(x:int,x_len:int)->str:
 		X.append(x % 256)
 		x >>= 8
 	X+=([0]*(x_len-len(X)))
-	X=X[::-1]
+	X.reverse()
 	for item in X:
 		os+=chr(item)
 
@@ -97,10 +99,10 @@ def ip2ascii(encoded_num:int) -> str:
 	output_str = ''
 	while j <= in_len-2:
 		tmp = encoded_num[j]
-		chars = tmp == '1' and 3 or 2
+		chars = (tmp == '1') and 3 or 2
 		tmp = encoded_num[j:j+chars]
 		output_str += chr(int(tmp))
-		j+= chars
+		j += chars
 
 	return output_str
 
@@ -121,7 +123,7 @@ def common_mod_atk(c1: int, c2: int, e1: int, e2: int, N: int) -> int:
 	return (mx*my) % N
 
 
-def fermats_factor(n:int) -> Tuple[int,int]:
+def fermats_factor(n:int) -> tuple[int,int]:
 	a = int_sqrt(n)
 	b = (a*a) - n
 	while not is_square(b):
@@ -134,7 +136,7 @@ def fermats_factor(n:int) -> Tuple[int,int]:
 	return p,q
 
 
-def make_fermat(bit_width:int) -> Tuple[int, int, int, int, int]:
+def make_fermat(bit_width:int) -> tuple[int, int, int, int, int]:
 	pl = bit_width // 2
 	p=get_prime(pl)
 	q = next_prime(p+(1<<(pl//3)))

@@ -451,3 +451,8 @@ def get_prime(bits:int) -> int:
 
 def bit_len(num:int) -> int:
 	return ceil(log(num+1)/log(2))
+
+def rev(s: str) -> str:
+	a = list(s)
+	a.reverse()
+	return ''.join(a)

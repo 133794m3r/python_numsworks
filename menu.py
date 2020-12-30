@@ -46,9 +46,9 @@ def rsa_encrypt_str():
 	global p, q, N, d, e, ct
 	options = [ascii2ip,os2ip]
 
-	params_provided = get_opt("1) Provide parameters.\n2) Generate parameters.\n", 1, 2)
+	params_provided = get_opt("\n1) Provide parameters.\n2) Generate parameters.\n", 1, 2)
 
-	opt = get_opt("Select Encoding\n1) Ascii String\n2) Standard RSA\n",1,2)
+	opt = get_opt("\nSelect Encoding\n1) Ascii String\n2) Standard RSA\n",1,2)
 
 	pt = input("Enter Plaintext: ")
 	M = options[opt](pt)
@@ -66,14 +66,14 @@ def rsa_encrypt_str():
 	else:
 		N, p, q, e, d = get_params()
 	ct = pow(M, e, N)
-	print('m={}'.format(hex(M)))
+	print('\nm={}'.format(hex(M)))
 	print('p={},q={},N={},e={},d={}'.format(hex(p), hex(q), hex(N), hex(e), hex(d)))
-	print('ct={}'.format(hex(pow(M, e, N))))
+	print('ct={}\n'.format(hex(pow(M, e, N))))
 
 
 def rsa_decrypt_str():
-	params_provided = get_opt("1) Provide parameters.\n2) Use Previous Values\n", 1, 2)
-	opt = get_opt("Select Encoding\n1) Ascii String\n2) Standard RSA\n",1,2)
+	params_provided = get_opt("\n1) Provide parameters.\n2) Use Previous Values\n", 1, 2)
+	opt = get_opt("\nSelect Encoding\n1) Ascii String\n2) Standard RSA\n",1,2)
 	options = [ip2ascii,ip2os]
 	if params_provided == 2:
 		global p, q, N, e, d, ct
@@ -84,7 +84,7 @@ def rsa_decrypt_str():
 
 	C = pow(ct,d,N)
 	ct_len = ceil(bit_len(C)/8)
-	print("Decrypted Message: ", options[opt](C,ct_len),"\n\n")
+	print("\nDecrypted Message: ", options[opt](C,ct_len),"\n")
 
 
 def fermat_attack():
@@ -103,8 +103,6 @@ def main():
 			options[ans-1]()
 		elif ans == 5:
 			break
-
-
 
 
 if __name__ == "__main__":
