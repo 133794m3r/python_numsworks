@@ -1,3 +1,4 @@
+from math import log, ceil
 from random import getrandbits
 
 
@@ -97,7 +98,7 @@ def __pow_(x: int, y: int, n=None) -> int:
 
 def is_square(n: int) -> bool:
 	"""
-	checks if the number 'n' is an even square.
+	checks if the number 'N' is an even square.
 
 	:param n: Number to check
 	:return: True or False if number is square or not.
@@ -242,12 +243,12 @@ def jacobi(a:int,n:int) ->int:
 	Jacobi symbol calculator.
 
 	:param a: The parameter a
-	:param n: The parameter n
+	:param n: The parameter N
 	:return: The integer
 	"""
 
 	if (not n & 1) or (n<0):
-		raise ValueError('n must be a positive odd number')
+		raise ValueError('N must be a positive odd number')
 	if(a == 0) or (a == 1):
 		return a
 
@@ -352,7 +353,7 @@ def sieve_test(n):
 		1019, 1021, 1031, 1033, 1039, 1049, 1051, 1061, 1063, 1069,
 		1087, 1091, 1093, 1097, 1103, 1109, 1117, 1123, 1129, 1151,
 		1153, 1163, 1171, 1181, 1187, 1193, 1201, 1213, 1217, 1223)
-	for prime in sive_base[0:14]:
+	for prime in sieve_base[0:14]:
 		if n % prime == 0:
 			return False
 	if n < 2809:
@@ -448,3 +449,5 @@ def get_prime(bits:int) -> int:
 	n = getmorebits(bits)
 	return next_prime(n)
 
+def bit_len(num:int) -> int:
+	return ceil(log(num+1)/log(2))

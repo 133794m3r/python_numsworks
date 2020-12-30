@@ -2,9 +2,12 @@ from typing import Tuple
 from nmath import *
 
 def make_key(key_size:int,e_size:int=8) -> Tuple[int, int, int, int, int]:
-	prime_length = key_size // 2
-	p=get_prime(prime_length)
-	q=get_prime(prime_length)
+	if key_size & 1:
+		prime_length = (key_size//2) + 1
+	else:
+		prime_length = key_size // 2
+	p = get_prime(key_size//2)
+	q = get_prime(prime_length)
 	while p == q:
 		q=get_prime(prime_length)
 
@@ -16,8 +19,13 @@ def make_key(key_size:int,e_size:int=8) -> Tuple[int, int, int, int, int]:
 
 
 def calc_n(prime_length:int) -> Tuple[int, int, int]:
-	prime_length = prime_length // 2
-	p=get_prime(prime_length)
+	if prime_length & 1:
+		prime_length = (prime_length//2) + 1
+		p = get_prime(prime_length-1)
+	else:
+		prime_length = prime_length // 2
+		p = get_prime(prime_length)
+
 	q=get_prime(prime_length)
 	while p == q:
 		q=get_prime(prime_length)
