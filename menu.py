@@ -1,6 +1,8 @@
 from crypto import *
 from nmath import *
 p, q, N, d, e, ct = 0, 0, 0, 0, 0, 0
+num_hex = False
+
 def get_int(prefix):
 	while True:
 		try:
@@ -17,6 +19,7 @@ def get_int(prefix):
 
 	return num
 
+
 def get_opt(prefix,m,n):
 	while True:
 		try:
@@ -28,6 +31,7 @@ def get_opt(prefix,m,n):
 		except ValueError:
 			print("Enter a valid number.")
 	return ans
+
 
 def get_params(decrypt=False):
 	p = get_int("Enter p: ")
@@ -42,13 +46,15 @@ def get_params(decrypt=False):
 
 	return N, p, q, e, d
 
+
 def rsa_encrypt_str():
 	global p, q, N, d, e, ct
-	options = [ascii2ip,os2ip]
+	options = (ascii2ip,os2ip)
 
-	params_provided = get_opt("\n1) Provide parameters.\n2) Generate parameters.\n", 1, 2)
-
-	opt = get_opt("\nSelect Encoding\n1) Ascii String\n2) Standard RSA\n",1,2)
+	params_provided = get_opt("\n1) Provide parameters.\n2) Generate parameters.\n3)Go back\n",1,3)
+	if params_provided == 3: return
+	opt = get_opt("\nSelect Encoding\n1) Ascii String\n2) Standard RSA\n3) Go Back\n",1,3)
+	if opt == 3: return
 
 	pt = input("Enter Plaintext: ")
 	M = options[opt](pt)
@@ -65,22 +71,30 @@ def rsa_encrypt_str():
 		N, p, q, e, d = make_key(bits, e_len)
 	else:
 		N, p, q, e, d = get_params()
+
 	ct = pow(M, e, N)
-	print('\nm={}'.format(hex(M)))
-	print('p={},q={},N={},e={},d={}'.format(hex(p), hex(q), hex(N), hex(e), hex(d)))
-	print('ct={}\n'.format(hex(pow(M, e, N))))
+	if num_hex:
+		print('\nm={}'.format(hex(M)))
+		print('p={},q={},N={},e={},d={}'.format(hex(p), hex(q), hex(N), hex(e), hex(d)))
+		print('ct={}\n'.format(hex(pow(M, e, N))))
+	else:
+		print('\nm={}'.format(M))
+		print('p={},q={},N={},e={},d={}'.format(p, q, N, e, d))
+		print('ct={}\n'.format(pow(M, e, N)))
 
 
 def rsa_decrypt_str():
-	params_provided = get_opt("\n1) Provide parameters.\n2) Use Previous Values\n", 1, 2)
-	opt = get_opt("\nSelect Encoding\n1) Ascii String\n2) Standard RSA\n",1,2)
-	options = [ip2ascii,ip2os]
+	params_provided = get_opt("\n1) Provide parameters.\n2) Use Previous Values\n3) Go back\n",1,3)
+	if params_provided == 3: return
+	opt = get_opt("\nSelect Encoding\n1) Ascii String\n2) Standard RSA\n3) Go Back\n",1,3)
+	if opt == 3: return
+
+	options = (ip2ascii,ip2os)
 	if params_provided == 2:
 		global p, q, N, e, d, ct
 	else:
 		N, p, q, e, d  = get_params(True)
 		ct = get_int("Enter Ciphertext Integer: ")
-
 
 	C = pow(ct,d,N)
 	ct_len = ceil(bit_len(C)/8)
@@ -90,14 +104,14 @@ def rsa_decrypt_str():
 def fermat_attack():
 	pass
 
+
 def common_mod_attack():
 	pass
 
 
 def main():
-	options = [rsa_encrypt_str,rsa_decrypt_str,fermat_attack,common_mod_attack]
+	options = (rsa_encrypt_str,rsa_decrypt_str,fermat_attack,common_mod_attack)
 	while True:
-		#print("Select Option\n1) RSA Encrypt\n2) RSA Decrypt\n3) Fermat Attack Generator/Solver\n4) Common Modulus Attack Generator/Solver\n5) Exit\n")
 		ans = get_opt("Select Option\n1) RSA Encrypt\n2) RSA Decrypt\n3) Fermat Attack Generator/Solver\n4) Common Modulus Attack Generator/Solver\n5) Exit\n",1,5)
 		if 4 >= ans >= 1:
 			options[ans-1]()
@@ -105,5 +119,4 @@ def main():
 			break
 
 
-if __name__ == "__main__":
-	main()
+main()
